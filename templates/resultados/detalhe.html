@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header class="d-flex justify-between align-center mb-2">
+    <h2 class="dashboard-title">Resultado Final</h2>
+    <div class="font-bold text-accent" style="font-size: 1.5rem; background: var(--surface); padding: 0.5rem 1.5rem; border-radius: 0.5rem; border: 1px solid #334155;">
+        Nota: {{ resultado.nota|floatformat:2 }} / 10.0
+    </div>
+</header>
+
+<section class="card mb-2">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;" class="text-muted">
+        <div><strong style="color: var(--text);">Aluno:</strong> {{ resultado.aluno.nome }}</div>
+        <div><strong style="color: var(--text);">Prova:</strong> {{ resultado.prova.disciplina }}</div>
+        <div><strong style="color: var(--text);">Acertos:</strong> {{ resultado.acertos }} / {{ resultado.prova.num_questoes }}</div>
+    </div>
+</section>
+
+<section class="card">
+    <h3 class="card-header" style="margin-top: 0; margin-bottom: 1.5rem;">Detalhamento das Questões</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="text-muted" style="padding: 1rem;">Nº</th>
+                <th class="text-muted" style="padding: 1rem;">Resposta Marcada</th>
+                <th class="text-muted" style="padding: 1rem;">Gabarito Oficial</th>
+                <th class="text-muted" style="padding: 1rem;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in details %}
+                <tr class="table-row">
+                    <td class="font-semibold" style="padding: 1rem;">{{ detail.questao }}</td>
+                    <td style="padding: 1rem;">
+                        {% if detail.marcada %}
+                            <span class="font-bold text-white" style="font-size: 1.2rem; background: #6366f1; padding: 0.2rem 0.6rem; border-radius: 0.3rem;">{{ detail.marcada }}</span>
+                        {% else %}
+                            <span class="text-danger" style="font-style: italic;">Não Identificada</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-semibold" style="padding: 1rem;">{{ detail.correta }}</td>
+                    <td style="padding: 1rem;">
+                        {% if detail.status %}
+                            <span class="text-success font-bold">CORRETA ✔️</span>
+                        {% else %}
+                            <span class="text-danger font-bold">ERRADA ❌</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<div class="text-center" style="margin-top: 3rem;">
+    <a href="{% url 'upload_gabarito' %}" class="btn">Processar Outro Gabarito</a>
+</div>
+{% endblock %}

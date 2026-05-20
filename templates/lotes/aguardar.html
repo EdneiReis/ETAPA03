@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_js %}
+<script src="{% static 'js/aguardar.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<main class="card text-center" style="max-width: 680px; margin: 0 auto;" 
+    id="aguardar-config"
+    data-url-progresso="{% url 'progresso_lote' lote_id=lote.pk %}"
+    data-url-revisao="{% url 'revisao_lote_v2' lote_id=lote.pk %}">
+
+    <h2 class="mt-0" style="margin-bottom: 0.5rem;">Processando PDF em Segundo Plano</h2>
+    <p class="text-muted mb-2-5">
+        Prova: <strong>{{ lote.prova.disciplina }}</strong>
+    </p>
+
+    <!-- Status atual -->
+    <section id="status-container" class="mb-2">
+        <p id="status-texto" class="font-semibold" style="font-size: 1.1rem; margin-bottom: 0.5rem;">
+            Aguardando início...
+        </p>
+        <p id="status-detalhe" class="text-muted" style="font-size: 0.9rem;">
+            O worker está preparando o processamento
+        </p>
+    </section>
+
+    <!-- Barra de progresso -->
+    <div class="mb-1" style="background: rgba(0,0,0,0.3); border-radius: 999px; height: 20px; overflow: hidden; border: 1px solid #334155;">
+        <div id="barra-progresso"
+             style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 999px; transition: width 0.5s ease; position: relative;">
+            <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 30px;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+                        animation: shimmer 1s infinite;"></div>
+        </div>
+    </div>
+
+    <p id="texto-porcentagem" class="font-bold text-primary" style="font-size: 2rem; margin-bottom: 0.25rem;">
+        0%
+    </p>
+    <p id="texto-contagem" class="text-muted mb-2" style="font-size: 0.85rem;">
+        0 de ? páginas processadas
+    </p>
+
+    <!-- Ícone animado de loading -->
+    <div id="loading-icon" class="mb-2">
+        <svg width="48" height="48" viewBox="0 0 48 48" style="animation: spin 1.2s linear infinite;">
+            <circle cx="24" cy="24" r="20" fill="none" stroke="#334155" stroke-width="4"/>
+            <path d="M24 4 A20 20 0 0 1 44 24" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <!-- Aviso de erro (oculto por padrão) -->
+    <div id="erro-container" class="text-danger mb-1-5" style="display: none; padding: 1rem; background: rgba(239,68,68,0.1);
+         border: 1px solid var(--danger); border-radius: 0.4rem;">
+        <strong>⚠️ Erro durante o processamento:</strong>
+        <p id="erro-mensagem" style="margin: 0.5rem 0 0;"></p>
+    </div>
+
+    <!-- Botão (oculto até concluir) -->
+    <div id="btn-container" style="display: none;">
+        <a id="btn-revisao" href="#" class="btn" style="font-size: 1.1rem; padding: 1rem 2.5rem; display: inline-block;">
+            ✅ Revisar Gabaritos do Lote
+        </a>
+    </div>
+
+    <p class="text-muted mt-2" style="font-size: 0.8rem;">
+        Você pode fechar esta aba e voltar depois. O processamento continua em segundo plano.
+    </p>
+</main>
+{% endblock %}

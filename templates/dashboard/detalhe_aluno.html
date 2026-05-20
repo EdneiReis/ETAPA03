@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="{% static 'css/resultados.css' %}?v=4.5">
+{% endblock %}
+
+{% block content %}
+<header class="detalhe-aluno-header">
+    <a href="{% url 'dashboard_resultados' %}" class="detalhe-aluno-back">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i> Dashboard
+    </a>
+    <span class="detalhe-aluno-sep" aria-hidden="true">/</span>
+    <h2 class="dashboard-title">{{ aluno.nome }}</h2>
+    <span class="premium-badge">{{ aluno.turma }}</span>
+    {% if aluno.matricula %}
+    <span class="premium-badge">Matrícula: {{ aluno.matricula }}</span>
+    {% endif %}
+</header>
+
+<section class="detalhe-aluno-kpis">
+    <article class="premium-kpi-card kpi-cyan">
+        <h3>{{ total_provas }}</h3>
+        <p>Provas Realizadas</p>
+    </article>
+    <article class="premium-kpi-card kpi-green">
+        <h3>{{ media|floatformat:1 }}</h3>
+        <p>Média Geral</p>
+    </article>
+    <article class="premium-kpi-card kpi-purple">
+        <h3 class="kpi-status-text">
+            {% if media >= 7 %}Aprovado{% elif media >= 5 %}Atenção{% else %}Reprovado{% endif %}
+        </h3>
+        <p>Status</p>
+    </article>
+</section>
+
+<section class="chart-card">
+    <h3 class="chart-title">
+        <i class="fas fa-history" aria-hidden="true"></i>
+        Histórico de Provas
+    </h3>
+
+    {% if resultados %}
+    <div class="table-responsive">
+        <table class="premium-table tabela-premium">
+            <thead>
+                <tr>
+                    <th>Prova</th>
+                    <th class="text-center">Acertos</th>
+                    <th class="text-center">Nota</th>
+                    <th>Idioma</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in resultados %}
+                <tr>
+                    <td><strong>{{ r.prova.disciplina }}</strong></td>
+                    <td class="text-center text-muted">{{ r.acertos }} / {{ r.prova.num_questoes }}</td>
+                    <td class="text-center">
+                        <span class="nota-badge {% if r.nota >= 6.0 %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ r.nota|floatformat:1 }}
+                        </span>
+                    </td>
+                    <td class="text-muted text-sm">
+                        {% if r.idioma_prova == 'EN' %}Inglês{% elif r.idioma_prova == 'ES' %}Espanhol{% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted text-sm">{{ r.data_conclusao|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center detalhe-aluno-empty">Nenhuma prova registrada para este aluno.</p>
+    {% endif %}
+</section>
+{% endblock %}

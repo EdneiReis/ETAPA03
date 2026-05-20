@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}
+
+{% block footer %}
+    {% if not is_popup %}
+        {% include "jazzmin/includes/footer.html" %}
+    {% endif %}
+{% endblock %}

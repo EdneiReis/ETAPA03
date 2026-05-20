@@ -1,0 +1,184 @@
+/* ==========================================
+   TRI.BUNAL — Jazzmin 3 / AdminLTE 4 (DOM real)
+   Seletores alinhados ao template admin/base.html
+   ========================================== */
+
+/* 1. Fundo geral — body usa bg-body-tertiary (não .wrapper/.content-wrapper) */
+html body.bg-body-tertiary,
+html body.layout-fixed {
+    --bs-body-bg: #0d131f !important;
+    --bs-body-color: #a1b0cb !important;
+    --bs-secondary-bg: #111824 !important;
+    --bs-tertiary-bg: #111824 !important;
+    background: #0d131f !important;
+    color: #a1b0cb !important;
+}
+
+html body .app-wrapper {
+    background: #0d131f !important;
+}
+
+html body .app-main,
+html body .app-content,
+html body .app-content-header {
+    background: #0d131f !important;
+}
+
+/* 2. Navbar — nav.app-header.bg-body (não .main-header) */
+html body nav.app-header,
+html body nav.app-header.bg-body {
+    background: #111824 !important;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.1) !important;
+}
+
+/* 3. Sidebar — aside.app-sidebar.bg-body-secondary (não .main-sidebar) */
+html body aside.app-sidebar,
+html body aside.app-sidebar.bg-body-secondary {
+    background: #111824 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+html body .sidebar-brand,
+html body .sidebar-brand a.brand-link {
+    background: #111824 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+html body .user-panel {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Menu lateral ativo */
+html body .sidebar-menu .nav-link.active,
+html body .nav-sidebar .nav-link.active {
+    background: rgba(0, 229, 255, 0.15) !important;
+    color: #00e5ff !important;
+    border-left: 3px solid #00e5ff !important;
+}
+
+/* 4. Rodapé */
+html body footer.app-footer,
+html body footer.main-footer {
+    background: #111824 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: #a1b0cb !important;
+}
+
+html body footer.main-footer.text-center {
+    text-align: center !important;
+}
+
+/* 5. Cards */
+html body .card {
+    background: #111824 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+html body .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: transparent !important;
+}
+
+html body .card-title,
+html body h1,
+html body h2,
+html body h3 {
+    color: #00e5ff !important;
+    font-weight: 600 !important;
+}
+
+html body .list-group-item {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: #a1b0cb !important;
+}
+
+/* 6. Botões */
+html body .btn-success {
+    background: rgba(0, 229, 255, 0.1) !important;
+    border: 1px solid #00e5ff !important;
+    color: #00e5ff !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+
+html body .btn-success:hover {
+    background: #00e5ff !important;
+    color: #0d131f !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4) !important;
+}
+
+html body .btn-info {
+    background: transparent !important;
+    border: 1px solid #a1b0cb !important;
+    color: #a1b0cb !important;
+    border-radius: 6px !important;
+}
+
+html body .btn-info:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* 7. Pesquisa no topo */
+html body nav.app-header .form-control,
+html body nav.app-header .form-control-navbar {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(0, 229, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+html body nav.app-header .form-control::placeholder {
+    color: #a1b0cb !important;
+}
+
+html body nav.app-header .btn-navbar,
+html body nav.app-header .input-group .btn {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(0, 229, 255, 0.2) !important;
+    border-left: none !important;
+    color: #00e5ff !important;
+}
+
+html body nav.app-header .form-control:focus {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
+}
+
+/* 8. Breadcrumbs */
+html body .breadcrumb {
+    background: transparent !important;
+}
+
+html body .breadcrumb-item a {
+    color: #00e5ff !important;
+}
+
+/* ==========================================
+   CORREÇÃO DOS ÍCONES DA TIMELINE
+   ========================================== */
+html body .timeline > div > i,
+html body .timeline > div > i[class*="bg-"] {
+    background: #111824 !important;
+    color: #00e5ff !important;
+    border: 1px solid #00e5ff !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
+}
+
+/* ==========================================
+   BLINDAGEM CONTRA O AUTOFILL DO NAVEGADOR
+   ========================================== */
+html body nav.app-header form input.form-control:-webkit-autofill,
+html body nav.app-header form input.form-control:-webkit-autofill:hover,
+html body nav.app-header form input.form-control:-webkit-autofill:focus,
+html body nav.app-header form input.form-control:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #111824 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border: 1px solid #00e5ff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

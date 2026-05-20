@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_js %}
+<script src="{% static 'js/form_prova.js' %}?v=1.8" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header-simple">
+    <a href="{% url 'dashboard_professor' %}" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Voltar para Minhas Provas
+    </a>
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">Preencha os dados abaixo para gerar o gabarito e configurar a correção automática.</p>
+</div>
+
+<div class="form-card-container">
+    <div id="form-config"
+        data-num-questoes-id="{{ form.num_questoes.id_for_label }}"
+        data-gabarito-texto-id="{{ form.gabarito_texto.id_for_label }}"
+        data-dificuldade-texto-id="{{ form.dificuldade_texto.id_for_label }}"
+        data-area-texto-id="{{ form.area_texto.id_for_label }}"
+        data-modelo-avaliacao-id="{{ form.modelo_avaliacao.id_for_label }}"
+        data-simulado-enem-id="{{ form.simulado_enem.id_for_label }}"
+        data-dia-enem-id="{{ form.dia_enem.id_for_label }}"
+        {% if title == 'Cadastrar Nova Prova' %}data-start-blank="1"{% endif %}
+        class="is-hidden">
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="{{ form.disciplina.id_for_label }}" class="form-label">Nome da Prova</label>
+                {{ form.disciplina }}
+                {% if form.disciplina.errors %}
+                    <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.disciplina.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label for="{{ form.tipo.id_for_label }}" class="form-label">Tipo de Prova</label>
+                    {{ form.tipo }}
+                    {% if form.tipo.errors %}
+                        <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.tipo.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group flex-1">
+                    <label for="{{ form.modelo_avaliacao.id_for_label }}" class="form-label">Modelo de Avaliação</label>
+                    <select name="{{ form.modelo_avaliacao.name }}" id="{{ form.modelo_avaliacao.id_for_label }}" class="form-select">
+                        {% for value, text in form.modelo_avaliacao.field.choices %}
+                            <option value="{{ value }}" {% if form.modelo_avaliacao.value == value %}selected{% endif %}>{{ text }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.modelo_avaliacao.errors %}
+                        <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.modelo_avaliacao.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tri-field">
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="{{ form.simulado_enem.id_for_label }}" class="form-label">Simulado ENEM</label>
+                    <select name="{{ form.simulado_enem.html_name }}" id="{{ form.simulado_enem.id_for_label }}" class="form-select">
+                        <option value="">— Nenhum Simulado —</option>
+                        {% for simulado in form.simulado_enem.field.queryset %}
+                            <option value="{{ simulado.pk }}" {% if form.simulado_enem.value == simulado.pk|stringformat:"s" %}selected{% endif %}>{{ simulado }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted" style="display:block; margin-top: 0.25rem;">Associe esta prova TRI a um Simulado ENEM. Ignorado para provas PADRÃO.</small>
+                    {% if form.simulado_enem.errors %}
+                        <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.simulado_enem.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tri-field">
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="{{ form.dia_enem.id_for_label }}" class="form-label">Dia do Simulado ENEM</label>
+                    <select name="{{ form.dia_enem.html_name }}" id="{{ form.dia_enem.id_for_label }}" class="form-select">
+                        {% for value, label in form.dia_enem.field.choices %}
+                            <option value="{{ value }}" {% if form.dia_enem.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted" style="display:block; margin-top: 0.25rem;">
+                        Preenche áreas automaticamente:
+                        <strong>Dia 1</strong> = LIN (Q1–45) + HUM (Q46–90) &nbsp;|&nbsp;
+                        <strong>Dia 2</strong> = NAT (Q1–45) + MAT (Q46–90)
+                    </small>
+                    {% if form.dia_enem.errors %}
+                        <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.dia_enem.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section divider-top">
+            <div class="form-row align-center">
+                <div class="form-group no-margin">
+                <label class="custom-checkbox-container" for="{{ form.tem_redacao.id_for_label }}">
+                    <input type="checkbox" name="{{ form.tem_redacao.name }}" id="{{ form.tem_redacao.id_for_label }}" class="custom-checkbox-input" {% if form.tem_redacao.value %}checked{% endif %}>
+                    <span class="custom-checkbox-text">Prova possui redação?</span>
+                </label>
+                {% if form.tem_redacao.errors %}
+                    <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.tem_redacao.errors }}</div>
+                {% endif %}
+                </div>
+
+                <div class="v-divider" aria-hidden="true"></div>
+
+                <div class="form-group no-margin flex-row-center">
+                    <label for="{{ form.num_questoes.id_for_label }}" class="form-label inline-label">Número de Questões:</label>
+                <div class="number-stepper">
+                    <button type="button" class="stepper-btn decrement" aria-label="Diminuir número de questões">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+
+                    <input type="number" name="{{ form.num_questoes.html_name }}" id="{{ form.num_questoes.id_for_label }}" class="stepper-input" value="{% if title == 'Cadastrar Nova Prova' %}0{% else %}{{ form.num_questoes.value|default:0 }}{% endif %}" min="0" max="100" required>
+
+                    <button type="button" class="stepper-btn increment" aria-label="Aumentar número de questões">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+                {% if form.num_questoes.errors %}
+                    <div class="text-danger mt-0" style="font-size: 0.8rem;">{{ form.num_questoes.errors }}</div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section dynamic-section">
+            <h3 class="config-title">Configuração do Gabarito Digital</h3>
+
+            <div class="gabarito-box">
+                <div class="is-hidden">
+                    {{ form.gabarito_texto }}
+                    {{ form.dificuldade_texto }}
+                    {{ form.area_texto }}
+                </div>
+
+                <div class="form-group">
+                    <label class="custom-checkbox-container" for="padrao_enem">
+                        <input type="checkbox" id="padrao_enem" class="custom-checkbox-input">
+                        <span class="custom-checkbox-text">Ativar Padrão ENEM (Inglês/Espanhol nas questões 1 a 5)</span>
+                    </label>
+                </div>
+
+                <div id="bubble-container" class="gabarito-scroll gabarito-area">
+                    <p class="text-muted text-center gabarito-empty-hint" style="font-style: italic;">Insira o número de questões para gerar o gabarito.</p>
+                    <div class="gabarito-rows-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary-action btn-block" id="btn-submit">Finalizar e Salvar</button>
+            <a href="{% url 'dashboard_professor' %}" class="btn-secondary-action btn-block">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

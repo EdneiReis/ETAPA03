@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="card" style="max-width: 960px; margin: 0 auto;">
+    <h2 class="section-title">
+        Revisar e Atribuir Alunos do Lote
+    </h2>
+    <p class="text-muted mb-2">
+        Prova: <strong>{{ lote.prova.disciplina }}</strong> —
+        <strong>{{ itens|length }}</strong> gabaritos extraídos
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <section class="d-flex flex-col gap-2 mb-2">
+            {% for item in itens %}
+            <article class="d-flex gap-1-5" style="background: rgba(0,0,0,0.15); padding: 1rem;
+                        border: 1px solid {% if item.error %}var(--danger){% else %}#334155{% endif %};
+                        border-radius: 0.5rem;">
+
+                <div style="flex: 0 0 220px;">
+                    {% if item.omr_debug_img_url %}
+                    <a href="{{ item.omr_debug_img_url }}" target="_blank" title="Visualização OMR (debug)">
+                        <img src="{{ item.omr_debug_img_url }}" alt="Debug OMR pág. {{ item.pagina_num }}"
+                             style="width: 100%; border: 1px solid var(--primary); border-radius: 0.3rem; display: block;">
+                    </a>
+                    <a href="{{ item.img_url }}" target="_blank" class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 0.25rem;">Página original</a>
+                    {% else %}
+                    <a href="{{ item.img_url }}" target="_blank">
+                        <img src="{{ item.img_url }}" alt="Gabarito pág. {{ item.pagina_num }}"
+                             style="width: 100%; border: 1px solid var(--primary); border-radius: 0.3rem; display: block;">
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="flex-1 d-flex flex-col justify-center">
+                    <div class="mb-1">
+                        <span class="font-bold" style="font-size: 1.05rem;">Página {{ item.pagina_num }}</span>
+
+                        {% if item.error %}
+                            <span class="text-danger ml-1" style="font-size: 0.85rem;">
+                                ⚠️ Erro OCR: {{ item.error|truncatechars:80 }}
+                            </span>
+                        {% else %}
+                            <span class="text-success ml-1" style="font-size: 0.85rem;">✓ Extraído com sucesso</span>
+
+                            {% if item.curso or item.serie %}
+                            <div class="badge badge-outline ml-1" style="display: inline-block;">
+                                📝 <strong>Lido:</strong>
+                                Curso: {{ item.curso|default:"N/A" }} |
+                                Série: {% if item.serie %}{{ item.serie }}ª{% else %}N/A{% endif %}
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-1">
+                        <div class="flex-2">
+                            <label class="text-muted" style="font-size: 0.85rem;">
+                                Atribuir ao Aluno:
+                                {% if item.matricula %}
+                                    <span class="text-accent">(OCR Matrícula: {{ item.matricula }})</span>
+                                {% endif %}
+                            </label>
+                            <select name="aluno_{{ forloop.counter0 }}" class="w-100">
+                                <option value="">--- Ignorar esta página (Não salvar nota) ---</option>
+
+                                {% if item.matricula and item.matricula != "XXXXX" and not item.suggested_aluno_id %}
+                                    {% if item.serie and item.curso %}
+                                    <option value="auto_create" selected class="bg-success text-white">
+                                        ✨ CADASTRAR NOVO ALUNO: Matrícula {{ item.matricula }}
+                                        (Turma: {{ item.serie }}ª {{ item.curso }})
+                                    </option>
+                                    {% else %}
+                                    <option disabled class="text-danger">
+                                        ❌ OCR Incompleto p/ Auto-Cadastro (Preencher à mão)
+                                    </option>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% for aluno in alunos %}
+                                <option value="{{ aluno.id }}"
+                                    {% if item.suggested_aluno_id == aluno.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ aluno.nome }} — Turma: {{ aluno.turma }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="flex-1">
+                            <label class="text-muted" style="font-size: 0.85rem;">
+                                Idioma ENEM:
+                                {% if item.idioma %}
+                                    <span class="text-accent">(Lido: {{ item.idioma }})</span>
+                                {% endif %}
+                            </label>
+                            <select name="idioma_{{ forloop.counter0 }}" class="w-100">
+                                <option value="EN" {% if item.idioma == 'EN' %}selected{% endif %}>Inglês</option>
+                                <option value="ES" {% if item.idioma == 'ES' %}selected{% endif %}>Espanhol</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {% if not item.error and item.answers %}
+                    <div class="text-muted mt-1" style="padding: 0.5rem; background: rgba(0,0,0,0.4);
+                                font-family: monospace; font-size: 0.72rem; border-radius: 0.2rem;
+                                word-break: break-all;">
+                        Extrato rápido: {{ item.answers }}
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <div class="text-right" style="border-top: 1px solid #334155; padding-top: 1.5rem;">
+            <a href="{% url 'dashboard_professor' %}" class="text-muted mr-2" style="text-decoration: none;">
+                Cancelar
+            </a>
+            <button type="submit" id="btn-salvar-lote" style="font-size:1.1rem;padding:1rem 2rem;background:linear-gradient(135deg,#00e5ff 0%,#0091ea 100%);color:#000;font-weight:700;border:none;border-radius:0.5rem;cursor:pointer;box-shadow:0 4px 15px rgba(0,229,255,0.4);">
+                💾 Salvar Lote no Banco
+            </button>
+            <script>
+            window.addEventListener('load', function() {
+                var b = document.getElementById('btn-salvar-lote');
+                if (b) {
+                    b.style.cssText = 'font-size:1.1rem;padding:1rem 2rem;background:linear-gradient(135deg,#00e5ff 0%,#0091ea 100%);color:#000;font-weight:700;border:none;border-radius:0.5rem;cursor:pointer;box-shadow:0 4px 15px rgba(0,229,255,0.4);';
+                }
+            });
+            </script>
+        </div>
+    </form>
+</main>
+{% endblock %}

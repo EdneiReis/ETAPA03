@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header-simple">
+    <a href="{% url 'dashboard_professor' %}" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Voltar para Minhas Provas
+    </a>
+    <h1 class="page-title">Upload em Lote (PDF)</h1>
+    <p class="page-subtitle">Selecione a prova e envie o PDF com todos os cartões-resposta para processamento.</p>
+</div>
+
+<div class="form-card-container" style="max-width: 800px;">
+
+    <form method="post" enctype="multipart/form-data" id="form-lote">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="prova" class="form-label">Selecione a Prova</label>
+                <select name="prova" id="prova" required class="form-select">
+                    {% for prova in provas %}
+                        <option value="{{ prova.id }}">{{ prova.disciplina }} ({{ prova.num_questoes }} questões)</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-section divider-top">
+            <div class="form-group">
+                <label for="gabarito_pdf" class="form-label">Arquivo PDF com Todos os Gabaritos</label>
+                <input type="file" name="gabarito_pdf" id="gabarito_pdf" accept="application/pdf" required class="form-control">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary-action btn-block" id="btn-submit">Processar PDF e Iniciar Revisão</button>
+        </div>
+    </form>
+
+    <!-- Barra de progresso -->
+    <div id="progress-wrapper" style="display: none; margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span id="progress-label" style="font-size: 0.875rem; color: var(--color-text-muted, #a0aec0);">Processando...</span>
+            <span id="progress-percent" style="font-size: 0.875rem; font-weight: 600; color: var(--color-primary, #00e5ff);">0%</span>
+        </div>
+        <div style="width: 100%; background: rgba(255,255,255,0.08); border-radius: 999px; height: 10px; overflow: hidden;">
+           <div id="progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #6b46c1, #00e5ff); border-radius: 999px; transition: width 0.4s ease;"></div>
+        </div>
+        <p id="progress-done" style="display: none; margin-top: 1rem; text-align: center; font-weight: 600; color: var(--color-primary, #00e5ff); font-size: 0.95rem;">
+            ✓ PDF processado com sucesso! Redirecionando...
+        </p>
+    </div>
+
+</div>
+
+<style>
+#gabarito_pdf::file-selector-button {
+    background-color: rgba(0, 229, 255, 0.15);
+    color: var(--color-primary, #00e5ff);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    padding: 0.4rem 0.85rem;
+    border-radius: 0.35rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 0.75rem;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#gabarito_pdf::file-selector-button:hover {
+    background-color: rgba(0, 229, 255, 0.25);
+    border-color: rgba(0, 229, 255, 0.7);
+}
+</style>
+
+<script>
+document.getElementById('form-lote').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const form = this;
+    const btn = document.getElementById('btn-submit');
+    const wrapper = document.getElementById('progress-wrapper');
+    const bar = document.getElementById('progress-bar');
+    const percent = document.getElementById('progress-percent');
+    const label = document.getElementById('progress-label');
+    const done = document.getElementById('progress-done');
+
+    btn.disabled = true;
+    btn.textContent = 'Processando...';
+    wrapper.style.display = 'block';
+
+    const messages = [
+        'Lendo páginas do PDF...',
+        'Identificando cartões-resposta...',
+        'Extraindo marcações...',
+        'Aplicando OCR...',
+        'Corrigindo respostas...',
+        'Finalizando...'
+    ];
+
+    let progress = 0;
+    let msgIndex = 0;
+
+    const interval = setInterval(() => {
+        const increment = Math.random() * 12 + 4;
+        progress = Math.min(progress + increment, 92);
+        bar.style.width = progress + '%';
+        percent.textContent = Math.round(progress) + '%';
+
+        if (msgIndex < messages.length - 1) {
+            label.textContent = messages[msgIndex];
+            msgIndex++;
+        }
+    }, 600);
+
+    const formData = new FormData(form);
+
+    fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+    })
+    .then(response => {
+        clearInterval(interval);
+        bar.style.width = '100%';
+        percent.textContent = '100%';
+        label.style.display = 'none';
+        percent.style.display = 'none';
+
+        done.style.display = 'block';
+
+        setTimeout(() => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                window.location.reload();
+            }
+        }, 1500);
+    })
+    .catch(() => {
+        clearInterval(interval);
+        bar.style.background = '#dc3545';
+        label.textContent = 'Erro ao processar. Tente novamente.';
+        label.style.color = '#dc3545';
+        percent.textContent = '';
+        btn.disabled = false;
+        btn.textContent = 'Processar PDF e Iniciar Revisão';
+    });
+});
+</script>
+
+{% endblock %}

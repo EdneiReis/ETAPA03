@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2 class="section-title">
+        Upload em Lote — Processamento Assíncrono
+    </h2>
+
+    {% if error %}
+    <div class="bg-danger text-white mb-1-5" style="padding: 1rem; border-radius: 0.4rem; border: 1px solid rgba(0,0,0,0.1);">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="form-upload">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="prova">Selecione a Prova</label>
+            <select name="prova" id="prova" required class="w-100">
+                {% for prova in provas %}
+                    <option value="{{ prova.id }}">{{ prova.disciplina }} ({{ prova.num_questoes }} questões)</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="gabarito_pdf">Arquivo PDF com Todos os Gabaritos</label>
+            <input type="file" name="gabarito_pdf" id="gabarito_pdf" accept="application/pdf" required class="w-100">
+            <small class="text-muted mt-0-5 d-block">
+                ✅ Suporta PDFs com 150+ páginas. O processamento ocorre em segundo plano.
+            </small>
+        </div>
+
+        <div class="text-center mt-2">
+            <button type="submit" class="btn w-100" id="btn-enviar">
+                Enviar PDF e Iniciar Processamento
+            </button>
+        </div>
+    </form>
+</main>
+{% endblock %}
